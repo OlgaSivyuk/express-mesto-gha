@@ -1,5 +1,7 @@
-const router = require ('express').Router();
+// const router = require('express').Router();
 
-// содержание роутера
+// const { createCard } = require('../controllers/cards');
 
-module.export = router
+// router.post('/', createCard);
+
+// module.export = router;

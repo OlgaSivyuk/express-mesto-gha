@@ -1,33 +1,8 @@
-const router = require ('express').Router();
-const User = require('../models/user')
+const router = require('express').Router();
+const { getUsers, createUser, getUserById } = require('../controllers/users');
 
-// router.get('/', (req, res) => {
-//   User.find({})
-//     .then(users => {res.status(200).send(users)
-//     })
-// });
+router.get('/', getUsers);
+router.get('/:userId', getUserById);
+router.post('/', createUser);
 
-// router.get('/:id', (req, res) => {
-//   User.findOne({_id: req.params.id})
-//     .then(user => {res.status(200)
-//     .send(user)
-//     })
-// });
-
-// router.post('/', (req, res) => {
-//   //console.log(req.body)
-//   User.create(req.body)
-//     .then(user => res.status(201)
-//     .send(user)
-//     .catch((err) => res.send('что-то пошло не так'))
-//     )
-// })
-
-// содержание роутера
-// const {
-//   getUsers,
-//   getUserById,
-//   createUser,
-// } = require('../controllers/users');
-
-module.export = router;
+module.exports = router;

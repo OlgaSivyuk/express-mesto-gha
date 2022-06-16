@@ -14,9 +14,9 @@ const userSchema = new mongoose.Schema({
     maxlength: 30, // а максимальная — 30 символов
   },
   avatar: {
-    type: String, 
+    type: String,
     required: true, // оно должно быть у каждого пользователя, так что имя — обязательное поле
-  }
+  },
 });
 
-module.exports = mongoose.model('user', userSchema)
+module.exports = mongoose.model('user', userSchema);

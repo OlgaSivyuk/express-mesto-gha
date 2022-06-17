@@ -18,7 +18,8 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
-  User.findOne({ _id: req.params.id })
+  console.log(req.params);
+  User.findOne({ _id: req.params.userId })
     .then((users) => res.status(200)
       .send({ data: users }))
     .catch((err) => res.status(500)

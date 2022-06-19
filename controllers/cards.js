@@ -22,7 +22,8 @@ module.exports.createCard = (req, res) => {
 
 module.exports.getCard = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).res.send({ data: cards }))
+    .then((cards) => res.status(200)
+      .res.send({ data: cards }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса карточки' });

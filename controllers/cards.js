@@ -64,7 +64,7 @@ module.exports.likeCard = (req, res) => {
     })
     .catch((err) => {
       // console.log(err.name);
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка карточки' });
       }
       return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
@@ -84,7 +84,7 @@ module.exports.dislikeCard = (req, res) => {
         .res.send(like);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для удаления лайка с карточки' });
       }
       return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });

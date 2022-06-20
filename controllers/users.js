@@ -5,12 +5,10 @@ const BAD_REQ_ERROR_CODE = 400;
 const NOT_FOUND_ERROR_CODE = 404;
 const DEFAULT_ERROR_CODE = 500;
 
-// возвращаем всех пользователей
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(OK_CODE).send({ data: users }))
     .catch((err) => {
-      // console.log(err.name);
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса пользователей' });
       }
@@ -18,15 +16,12 @@ module.exports.getUsers = (req, res) => {
     });
 };
 
-// создаем нового пользователя
 module.exports.createUser = (req, res) => {
-  // console.log('createUser', req.params);
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      // console.log(err.name);
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для создания пользователя' });
       }
@@ -35,7 +30,6 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
-  // console.log('getUserById', req.params);
   User.findOne({ _id: req.params.userId })
     .then((users) => {
       if (users === null) {
@@ -45,7 +39,6 @@ module.exports.getUserById = (req, res) => {
         .send({ data: users });
     })
     .catch((err) => {
-      // console.log(err);
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса пользователя' });
       }
@@ -54,7 +47,6 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  // console.log('updateProfile', req.params);
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
@@ -69,7 +61,6 @@ module.exports.updateProfile = (req, res) => {
         .send({ data: users });
     })
     .catch((err) => {
-      // console.log(err.name);
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для обновления пользователя' });
       }
@@ -78,7 +69,6 @@ module.exports.updateProfile = (req, res) => {
 };
 
 module.exports.updateAvatar = (req, res) => {
-  // console.log('updateAvatar', req.params);
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
@@ -93,7 +83,6 @@ module.exports.updateAvatar = (req, res) => {
         .send({ data: users });
     })
     .catch((err) => {
-      // console.log(err.name);
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для обновления пользователя' });
       }

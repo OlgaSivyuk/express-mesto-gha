@@ -7,15 +7,11 @@ const DEFAULT_ERROR_CODE = 500;
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
-  // const owner = req.params.userId;
   const owner = req.user._id;
-  console.log(`проверочка ${name} ${link} ${owner}`);
-  // console.log(req.params);
   Card.create({ name, link, owner })
     .then((card) => res.status(OK_CODE)
       .send({ data: card }))
     .catch((err) => {
-      // console.log(err.name);
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для создания карточки' });
       }
@@ -36,7 +32,6 @@ module.exports.getCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  console.log(req.params);
   Card.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
       throw new Error('NotFound');
@@ -46,7 +41,6 @@ module.exports.deleteCard = (req, res) => {
         .send({ data: card });
     })
     .catch((err) => {
-      console.log(err);
       if (err.message === 'NotFound') {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
       }
@@ -60,7 +54,7 @@ module.exports.deleteCard = (req, res) => {
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    { $addToSet: { likes: req.user._id } },
     { new: true },
   )
     .then((like) => {
@@ -70,7 +64,6 @@ module.exports.likeCard = (req, res) => {
         .send(like);
     })
     .catch((err) => {
-      // console.log(err.name);
       if (err.name === 'CastError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка карточки' });
       }
@@ -81,7 +74,7 @@ module.exports.likeCard = (req, res) => {
 module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { $pull: { likes: req.user._id } },
     { new: true },
   )
     .then((like) => {
@@ -97,19 +90,3 @@ module.exports.dislikeCard = (req, res) => {
       return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
-
-// module.exports.dislikeCard = (req, res) => {
-//   Card.findByIdAndUpdate(
-//     req.params.cardId,
-//     { $pull: { likes: req.user.userId } }, // убрать _id из массива
-//     { new: true },
-//   )
-//     .then((like) => res.send(like))
-//     .catch((err) => res.status(404)
-//       .send({ message: err.message }));
-// };
-// deleteCard
-// if (card === null) {
-//   return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
-// } return res.status(200)
-//   .send({ data: card });

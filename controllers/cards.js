@@ -35,8 +35,7 @@ module.exports.getCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  console.log(req.params);
-  // const { cardId } = req.params;
+  // console.log(req.params);
   Card.findByIdAndRemove(req.params.cardId)
     .orFail()
     .then((card) => {
@@ -46,7 +45,8 @@ module.exports.deleteCard = (req, res) => {
         .send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      console.log(err);
+      if (err.name === 'CastError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для удаления карточки' });
       }
       return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });

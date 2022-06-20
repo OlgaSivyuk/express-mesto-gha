@@ -1,5 +1,6 @@
 const User = require('../models/user');
 
+const OK_CODE = 200;
 const BAD_REQ_ERROR_CODE = 400;
 const NOT_FOUND_ERROR_CODE = 404;
 const DEFAULT_ERROR_CODE = 500;
@@ -7,7 +8,7 @@ const DEFAULT_ERROR_CODE = 500;
 // возвращаем всех пользователей
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
+    .then((users) => res.status(OK_CODE).send({ data: users }))
     .catch((err) => {
       // console.log(err.name);
       if (err.name === 'ValidationError') {
@@ -40,7 +41,7 @@ module.exports.getUserById = (req, res) => {
       if (users === null) {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному id не найден' });
       }
-      return res.status(200)
+      return res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {
@@ -64,7 +65,7 @@ module.exports.updateProfile = (req, res) => {
       if (users === null) {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному id не найден' });
       }
-      return res.status(200)
+      return res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {
@@ -88,7 +89,7 @@ module.exports.updateAvatar = (req, res) => {
       if (users === null) {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному id не найден' });
       }
-      return res.status(200)
+      return res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {

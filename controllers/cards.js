@@ -1,5 +1,6 @@
 const Card = require('../models/card');
 
+const OK_CODE = 200;
 const BAD_REQ_ERROR_CODE = 400;
 const NOT_FOUND_ERROR_CODE = 404;
 const DEFAULT_ERROR_CODE = 500;
@@ -11,7 +12,7 @@ module.exports.createCard = (req, res) => {
   console.log(`проверочка ${name} ${link} ${owner}`);
   // console.log(req.params);
   Card.create({ name, link, owner })
-    .then((card) => res.status(200)
+    .then((card) => res.status(OK_CODE)
       .send({ data: card }))
     .catch((err) => {
       // console.log(err.name);
@@ -24,7 +25,7 @@ module.exports.createCard = (req, res) => {
 
 module.exports.getCard = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(200)
+    .then((cards) => res.status(OK_CODE)
       .send({ data: cards }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -41,12 +42,8 @@ module.exports.deleteCard = (req, res) => {
       throw new Error('NotFound');
     })
     .then((card) => {
-      res.status(200)
+      res.status(OK_CODE)
         .send({ data: card });
-      // if (card === null) {
-      //   return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
-      // } return res.status(200)
-      //   .send({ data: card });
     })
     .catch((err) => {
       console.log(err);
@@ -69,7 +66,7 @@ module.exports.likeCard = (req, res) => {
     .then((like) => {
       if (like === null) {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
-      } return res.status(200)
+      } return res.status(OK_CODE)
         .send(like);
     })
     .catch((err) => {
@@ -90,7 +87,7 @@ module.exports.dislikeCard = (req, res) => {
     .then((like) => {
       if (like === null) {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
-      } return res.status(200)
+      } return res.status(OK_CODE)
         .send(like);
     })
     .catch((err) => {
@@ -111,3 +108,8 @@ module.exports.dislikeCard = (req, res) => {
 //     .catch((err) => res.status(404)
 //       .send({ message: err.message }));
 // };
+// deleteCard
+// if (card === null) {
+//   return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
+// } return res.status(200)
+//   .send({ data: card });

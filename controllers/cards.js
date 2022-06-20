@@ -35,19 +35,21 @@ module.exports.getCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  // console.log(req.params);
+  console.log(req.params);
   Card.findByIdAndRemove(req.params.cardId)
-    .orFail()
+    .orFail(new Error('Not found'))
     .then((card) => {
-      if (card === null) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
-      } return res.status(200)
+      res.status(200)
         .send({ data: card });
+      // if (card === null) {
+      //   return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
+      // } return res.status(200)
+      //   .send({ data: card });
     })
     .catch((err) => {
       console.log(err);
       if (err.name === 'CastError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для удаления карточки' });
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
       }
       return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });

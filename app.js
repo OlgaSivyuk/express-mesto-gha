@@ -7,14 +7,6 @@ const app = express();
 
 // подключаемся к серверу mongo
 mongoose.connect('mongodb://localhost:27017/mestodb');
-// , {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// }).then(() => {
-//   console.log('mongoDB connection sucsessfull');
-// }).catch(() => {
-//   console.log('mongoDB connection error');
-// });
 
 // просматриваем запросы со строками и другими типами данных
 app.use(bodyParser.json());
@@ -34,7 +26,7 @@ app.use('/cards', require('./routes/cards'));
 
 // обработка несуществующего роута
 app.use((req, res) => {
-  res.status(404).send({ message: 'Страницы не существует' });
+  res.status(404).send({ message: 'Страница не существует' });
 });
 
 app.listen(PORT, () => {

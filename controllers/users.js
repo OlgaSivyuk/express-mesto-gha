@@ -1,18 +1,22 @@
 const User = require('../models/user');
 
-const OK_CODE = 200;
-const BAD_REQ_ERROR_CODE = 400;
-const NOT_FOUND_ERROR_CODE = 404;
-const DEFAULT_ERROR_CODE = 500;
+// const OK_CODE = 200;
+// const BAD_REQ_ERROR_CODE = 400;
+// const NOT_FOUND_ERROR_CODE = 404;
+// const DEFAULT_ERROR_CODE = 500;
+
+const {
+  OK_CODE,
+  BAD_REQ_ERROR_CODE,
+  NOT_FOUND_ERROR_CODE,
+  DEFAULT_ERROR_CODE,
+} = require('../constants/errorsCode');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(OK_CODE).send({ data: users }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса пользователей' });
-      }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+    .catch(() => {
+      res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -54,13 +58,13 @@ module.exports.updateProfile = (req, res) => {
       throw new Error('NotFound');
     })
     .then((users) => {
-      if (users === null) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному id не найден' });
-      }
-      return res.status(OK_CODE)
+      res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {
+      if (err.message === 'NotFound') {
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь с таким id не найден' });
+      }
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для обновления пользователя' });
       }
@@ -76,13 +80,13 @@ module.exports.updateAvatar = (req, res) => {
       throw new Error('NotFound');
     })
     .then((users) => {
-      if (users === null) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному id не найден' });
-      }
-      return res.status(OK_CODE)
+      res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {
+      if (err.message === 'NotFound') {
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь с таким id не найден' });
+      }
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для обновления пользователя' });
       }

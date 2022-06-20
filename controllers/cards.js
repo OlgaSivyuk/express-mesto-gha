@@ -1,9 +1,16 @@
 const Card = require('../models/card');
 
-const OK_CODE = 200;
-const BAD_REQ_ERROR_CODE = 400;
-const NOT_FOUND_ERROR_CODE = 404;
-const DEFAULT_ERROR_CODE = 500;
+// const OK_CODE = 200;
+// const BAD_REQ_ERROR_CODE = 400;
+// const NOT_FOUND_ERROR_CODE = 404;
+// const DEFAULT_ERROR_CODE = 500;
+
+const {
+  OK_CODE,
+  BAD_REQ_ERROR_CODE,
+  NOT_FOUND_ERROR_CODE,
+  DEFAULT_ERROR_CODE,
+} = require('../constants/errorsCode');
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
@@ -23,11 +30,8 @@ module.exports.getCard = (req, res) => {
   Card.find({})
     .then((cards) => res.status(OK_CODE)
       .send({ data: cards }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса карточки' });
-      }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+    .catch(() => {
+      res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 

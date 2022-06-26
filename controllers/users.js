@@ -1,5 +1,7 @@
+const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
+const SALT_ROUNDS = 10;
 // const OK_CODE = 200;
 // const BAD_REQ_ERROR_CODE = 400;
 // const NOT_FOUND_ERROR_CODE = 404;
@@ -33,12 +35,17 @@ module.exports.createUser = (req, res) => {
   if (!email || !password) {
     return res.status(400).send({ message: 'не передан email или пароль' });
   }
-  return User.create({
-    name,
-    about,
-    avatar,
-    email,
-    password,
+
+  return bcrypt.hash(password, SALT_ROUNDS).then((hash) => {
+    console.log(hash);
+
+    return User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password,
+    });
   })
     .then((user) => {
       console.log(user);

@@ -24,6 +24,13 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
+// пути для логина и регистрации
+// app.post('/signin', login);
+// app.post('/signup', createUser);
+// или
+// app.post('/signin', require('./routes/users'));
+app.post('/signup', require('./routes/users'));
+
 // обработка несуществующего роута
 app.use((req, res) => {
   res.status(404).send({ message: 'Страница не существует' });

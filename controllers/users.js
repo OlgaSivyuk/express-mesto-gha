@@ -36,19 +36,19 @@ module.exports.createUser = (req, res) => {
     return res.status(400).send({ message: 'не передан email или пароль' });
   }
 
-  return bcrypt.hash(password, SALT_ROUNDS).then((hash) => {
-    console.log(hash);
-
-    return User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password,
-    });
-  })
+  return bcrypt.hash(password, SALT_ROUNDS) // хешируем пароль
+    .then((hash) => {
+      console.log(hash);
+      return User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      });
+    })
     .then((user) => {
-      console.log(user);
+      // console.log(user);
       res.status(201).send({ data: user, message: 'пользователь создан' });
       // res.send({ message: 'пользователь создан' });
     })

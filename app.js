@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -12,13 +14,16 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '62ac4882d3769638e9561618',
-  };
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '62ac4882d3769638e9561618',
+//   };
 
-  next();
-});
+//   next();
+// });
+
+app.use(cookieParser());
+app.use(auth);
 
 // пути роутинга
 app.use('/users', require('./routes/users'));

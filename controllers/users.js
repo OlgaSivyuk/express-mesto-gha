@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+// const { generateTocken } = require('../middlewares/auth');
 
 const SALT_ROUNDS = 10;
 const SECRET_KEY = 'very_secret';
@@ -138,53 +139,47 @@ module.exports.updateAvatar = (req, res) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  // console.log(req, 'auth_login');
+  console.log('1 проверка auth_login');
 
-  if (!email || !password) {
-    return res.status(400).send({ message: 'не передан email или пароль' });
-  }
-
-  return User.findOne({ email }) // способ №1 провалидировать данные нового юзера поискать по имейлу
-    .then((foundUser) => {
-      console.log(foundUser);
-      // return res.status(409).send({ message: 'email занят' });
-      if (!foundUser) {
-        const err = new Error({ message: 'не верный email или пароль' });
+  // if (!email || !password) {
+  //   return res.status(400).send({ message: 'Не передан email или пароль' });
+  // }
+  User.findOne({ email }).select('+password')
+    .then((user) => {
+      console.log(user, '2 проверка in first then');
+      if (!user) {
+        const err = new Error('Неправильные email или пароль (проверка юзера)');
         err.statusCode = 403;
         throw err;
-        // return res.status(403).send({ message: 'не верный email или пароль' });
+        // return res.status(403).send({
+        // message: 'Неправильные email или пароль (проверка юзера)' });
       }
-      return Promise.all([
-        foundUser,
-        bcrypt.compare(password, foundUser.password),
-      ]);
-      // return bcrypt.compare(password, user.password);
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) { // хеши не совпали — отклоняем промис
+            const err = new Error('Неправильные email или пароль (проверка хеша)');
+            err.statusCode = 403;
+            throw err;
+            // return res.status(403).send({
+            // message: 'Неправильные email или пароль (проверка хеша)' });
+          }
+          console.log('3 здесь возвращаем токен');
+          const token = jwt.sign({ email: user.email, _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
+          res.send({ token });
+          res.cookie('jwt', token, { maxAge: 3600000, httpOnly: true })
+            .end();
+        });
     })
-    .then(([user, isPasswordCorrect]) => { // проверяем корректность пароля при логине
-      // console.log('in second then');
-      if (!isPasswordCorrect) {
-        const err = new Error({ message: 'не верный email или пароль' });
-        err.statusCode = 403;
-        throw err;
-        // return res.status(403).send({ message: 'не верный email или пароль' });
-      }
-      // console.log('password');
-      // если пароль совпал с созданным,  возвращаем токен
-      // return res.send({ message: 'здесь нужно вернуть токен' });
-      return jwt.sign({ email: user.email }, SECRET_KEY); // работает ассинхронно
-    })
-    .then((token) => {
-      console.log(token);
-      res.send({ token });
-    })
+
+    // .then((token) => {
+    //   console.log(token);
+    //   // return res.status(OK_CODE).send({ message: 'Всё верно!' });
+    // })
     .catch((err) => {
-      if (err.statusCode === 403) {
-        return res.status(403).send({ message: 'тут месседж об ошибке' });
-      }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      // if (err.statusCode === 403) {
+      //   return res.status(403).send({ message: err.message });
+      // }
+      // return res.status(401).send({ message: err.message });
+      res.status(401).send({ message: err.message });
     });
 };
-
-// module.exports.createUser = (req, res) => {
-//   res.send({ message: 'register_createUser' }),
-// };

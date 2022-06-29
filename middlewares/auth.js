@@ -7,7 +7,10 @@ module.exports = (req, res, next) => {
   console.log('auth', { authorization });
 
   if (!authorization) {
-    return res.status(401).send({ message: 'Нужно авторизоваться для доступа' });
+    const error = new Error('Нужно авторизоваться для доступа');
+    error.statusCode = 403;
+    throw error;
+    // return res.status(401).send({ message: 'Нужно авторизоваться для доступа' });
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -18,7 +21,10 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'very_secret');
   } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    const error = new Error('Нужно авторизоваться для доступа');
+    err.statusCode = 403;
+    throw error;
+    // return res.status(401).send({ message: 'Необходима авторизация' });
   }
 
   req.user = payload;

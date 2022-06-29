@@ -77,6 +77,7 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
+  console.log({ _id: req.params.userId });
   User.findOne({ _id: req.params.userId })
     .then((users) => {
       if (users === null) {

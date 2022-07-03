@@ -52,7 +52,7 @@ app.post(
 );
 
 app.use(cookieParser());
-app.use(auth);
+// app.use(auth);
 
 // пути роутинга
 app.use('/users', auth, require('./routes/users'));
@@ -64,6 +64,7 @@ app.use('/cards', auth, require('./routes/cards'));
 // или
 // app.post('/signin', require('./routes/users'));
 app.post('/signup', require('./routes/users'));
+app.post('/signin', require('./routes/users'));
 
 // обработка несуществующего роута
 app.use((req, res) => {
@@ -74,8 +75,8 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.log(err);
 
-  if (err.statusCode === 401) {
-    res.status(401).send({ message: err.message });
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
   }
 
   console.error(err.stack);

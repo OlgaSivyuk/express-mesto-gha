@@ -72,7 +72,7 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
-  console.log({ _id: req.params.userId });
+  // console.log({ _id: req.params.userId });
   User.findOne({ _id: req.params.userId })
     .then((users) => {
       if (users === null) {
@@ -84,6 +84,24 @@ module.exports.getUserById = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса пользователя' });
+      }
+      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+    });
+};
+
+module.exports.getUserByCookie = (req, res) => {
+  console.log(req.user);
+  User.findOne({ _id: req.user._id })
+    .then((users) => {
+      if (users === null) {
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному id не найден' });
+      }
+      return res.status(OK_CODE)
+        .send({ data: users });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса пользователя (куки))' });
       }
       return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });

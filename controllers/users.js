@@ -5,11 +5,6 @@ const User = require('../models/user');
 
 const SALT_ROUNDS = 10;
 const SECRET_KEY = 'very_secret';
-// const OK_CODE = 200;
-// const BAD_REQ_ERROR_CODE = 400;
-// const NOT_FOUND_ERROR_CODE = 404;
-// const DEFAULT_ERROR_CODE = 500;
-// const MONGO_DUPLICATE_ERROR_CODE = 11000;
 
 const {
   OK_CODE,
@@ -165,10 +160,10 @@ module.exports.login = (req, res) => {
             // message: 'Неправильные email или пароль (проверка хеша)' });
           }
           console.log('3 здесь возвращаем токен');
-          const token = jwt.sign({ email: user.email, _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
-          res.send({ token });
-          res.cookie('jwt', token, { maxAge: 3600000, httpOnly: true })
-            .end();
+          const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
+          // res.send({ token });
+          res.cookie('jwt', token, { maxAge: 3600000, httpOnly: true });
+          res.send({ message: 'Всё верно!' });
         });
     })
 

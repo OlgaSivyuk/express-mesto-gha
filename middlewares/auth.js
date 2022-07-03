@@ -3,20 +3,20 @@ const jwt = require('jsonwebtoken');
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   console.log('is authorized');
-  const { authorization } = req.headers;
-  console.log('auth', { authorization });
+  const token = req.cookies.jwt;
+  console.log('auth', token);
 
-  if (!authorization) {
+  if (!token) {
     const error = new Error('Нужно авторизоваться для доступа');
     error.statusCode = 403;
     throw error;
     // return res.status(401).send({ message: 'Нужно авторизоваться для доступа' });
   }
 
-  const token = authorization.replace('Bearer ', '');
+  // const token = authorization.replace('Bearer ', '');
   let payload;
 
-  console.log(token);
+  console.log('token', token);
 
   try {
     payload = jwt.verify(token, 'very_secret');

@@ -62,13 +62,6 @@ module.exports.createUser = (req, res) => {
       }
       return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
-
-  // User.findOne({ email }) // способ №1 провалидировать данные нового юзера поискать по имейлу
-  //   .then((user) => {
-  //     if (user) {
-  //       return res.status(409).send({ message: 'email занят' });
-  //     }
-  //   });
 };
 
 module.exports.getUserById = (req, res) => {
@@ -89,7 +82,7 @@ module.exports.getUserById = (req, res) => {
     });
 };
 
-module.exports.getUserByCookie = (req, res) => {
+module.exports.getUserMe = (req, res) => {
   console.log(req.user);
   User.findOne({ _id: req.user._id })
     .then((users) => {

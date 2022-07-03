@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { celebrate, Joi } = require('celebrate');
+const { errors } = require('celebrate');
 // const celebrate = require('celebrate');
 const auth = require('./middlewares/auth');
 
@@ -70,6 +71,8 @@ app.post('/signin', require('./routes/users'));
 app.use((req, res) => {
   res.status(404).send({ message: 'Страница не существует' });
 });
+
+app.use(errors());
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {

@@ -3,7 +3,7 @@ const {
   getUsers,
   createUser,
   getUserById,
-  getUserByCookie,
+  getUserMe,
   updateProfile,
   updateAvatar,
   login,
@@ -11,12 +11,10 @@ const {
 
 router.get('/', getUsers);
 router.patch('/me', updateProfile);
-router.get('/me', getUserByCookie);
+router.get('/me', getUserMe);
 router.patch('/me/avatar', updateAvatar);
 router.post('/signin', login);
 router.post('/signup', createUser);
 router.get('/:userId', getUserById);
-// router.get('/me',);
-// router.post('/', createUser);
 
 module.exports = router;

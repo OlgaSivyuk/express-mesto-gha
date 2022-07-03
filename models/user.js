@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     // required: true,
-    validator: {
+    validate: {
       validator(value) {
         return /https?:\W{2}[www]?\W?([2-domains]|[-?\w+]+)[\Wru]([\W\w{2,}]?)*\W?.+#?/.test(value);
       },
@@ -31,17 +31,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    validate: {
+      validator: (v) => {
+        console.log(validator.isEmail(v));
+        // validator.isEmail(v);
+        // false;
+      },
+    },
   },
   password: {
     type: String,
     required: true,
     select: false,
-    validator: {
-      validator(v) {
-        return validator.isEmail(v);
-      },
-      message: 'введен некорректный формат email',
-    },
   },
 });
 

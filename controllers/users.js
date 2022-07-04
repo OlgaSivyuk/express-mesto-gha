@@ -8,6 +8,9 @@ const SECRET_KEY = 'very_secret';
 const {
   OK_CODE,
   CREATED_CODE,
+  // BAD_REQ_ERROR_CODE,
+  // NOT_FOUND_ERROR_CODE,
+  // DEFAULT_ERROR_CODE,
 } = require('../constants/errorsCode');
 
 const BadReqError = require('../errors/bad-req-error');
@@ -31,7 +34,7 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
 
   if (!email || !password) {
-    throw new BadReqError('Не передан email или пароль.');
+    return res.status(400).send({ message: 'не передан email или пароль' });
   }
   return bcrypt.hash(password, SALT_ROUNDS) // хешируем пароль
     .then((hash) => {
@@ -51,10 +54,12 @@ module.exports.createUser = (req, res, next) => {
     .catch((err) => {
       console.log(err);
       if (err.name === 'ValidationError') {
-        throw new BadReqError('Переданы некорректные данные для создания пользователя.');
+        next(new BadReqError('Переданы некорректные данные для создания пользователя.'));
+        return;
       }
       if (err.name === 'MongoServerError') {
-        throw new ConflictError('Пользователь с таким email уже есть.');
+        next(new ConflictError('Пользователь с таким email уже есть.'));
+        return;
       }
       next(err);
     });
@@ -65,14 +70,14 @@ module.exports.getUserById = (req, res, next) => {
   User.findOne({ _id: req.params.userId })
     .then((users) => {
       if (users === null) {
-        throw new NotFoundError('Пользователь по указанному id не найден.');
+        next(new NotFoundError('Пользователь по указанному id не найден.'));
       }
       return res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        throw new BadReqError('Переданы некорректные данные для запроса пользователя.');
+        next(new BadReqError('Переданы некорректные данные для запроса пользователя.'));
       }
       next(err);
     });
@@ -83,14 +88,14 @@ module.exports.getUserMe = (req, res, next) => {
   User.findOne({ _id: req.user._id })
     .then((users) => {
       if (users === null) {
-        throw new NotFoundError('Пользователь по указанному id не найден.');
+        next(new NotFoundError('Пользователь по указанному id не найден.'));
       }
       return res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        throw new BadReqError('Переданы некорректные данные для запроса пользователя (куки).');
+        next(new BadReqError('Переданы некорректные данные для запроса пользователя (куки).'));
       }
       next(err);
     });
@@ -108,10 +113,10 @@ module.exports.updateProfile = (req, res, next) => {
     })
     .catch((err) => {
       if (err.message === 'NotFound') {
-        throw new NotFoundError('Пользователь с таким id не найден.');
+        next(new NotFoundError('Пользователь с таким id не найден.'));
       }
       if (err.name === 'ValidationError') {
-        throw new BadReqError('Переданы некорректные данные для обновления пользователя.');
+        next(new BadReqError('Переданы некорректные данные для обновления пользователя.'));
       }
       next(err);
     });
@@ -129,10 +134,10 @@ module.exports.updateAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.message === 'NotFound') {
-        throw new NotFoundError('Пользователь с таким id не найден.');
+        next(new NotFoundError('Пользователь с таким id не найден.'));
       }
       if (err.name === 'ValidationError') {
-        throw new BadReqError('Переданы некорректные данные для обновления пользователя.');
+        next(new BadReqError('Переданы некорректные данные для обновления пользователя.'));
       }
       next(err);
     });
@@ -159,7 +164,5 @@ module.exports.login = (req, res, next) => {
           res.status(OK_CODE).send({ message: 'Всё верно!' });
         });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };

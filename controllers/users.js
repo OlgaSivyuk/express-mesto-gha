@@ -13,10 +13,10 @@ const {
   // DEFAULT_ERROR_CODE,
 } = require('../constants/errorsCode');
 
-const BadReqError = require('../errors/bad-req-error');
-const AuthorizationError = require('../errors/authorization-error');
-const NotFoundError = require('../errors/not-found-error');
-const ConflictError = require('../errors/conflict-error');
+const BadReqError = require('../errors/bad-req-error'); // 400
+const AuthorizationError = require('../errors/authorization-error'); // 401
+const NotFoundError = require('../errors/not-found-error'); // 404
+const ConflictError = require('../errors/conflict-error'); // 409
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})

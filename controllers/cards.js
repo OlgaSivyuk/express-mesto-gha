@@ -2,12 +2,17 @@ const Card = require('../models/card');
 
 const {
   OK_CODE,
-  BAD_REQ_ERROR_CODE,
-  NOT_FOUND_ERROR_CODE,
-  DEFAULT_ERROR_CODE,
+  // BAD_REQ_ERROR_CODE,
+  // NOT_FOUND_ERROR_CODE,
+  // DEFAULT_ERROR_CODE,
 } = require('../constants/errorsCode');
 
-module.exports.createCard = (req, res) => {
+const BadReqError = require('../errors/bad-req-error'); // 400
+const ForbiddenError = require('../errors/forbiden-error'); // 403
+const NotFoundError = require('../errors/not-found-error'); // 404
+// const ConflictError = require('../errors/conflict-error'); // 409
+
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
@@ -15,25 +20,34 @@ module.exports.createCard = (req, res) => {
       .send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для создания карточки' });
+        next(new BadReqError('Переданы некорректные данные для создания пользователя.'));
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для создания карточки' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.getCard = (req, res) => {
+module.exports.getCard = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(OK_CODE)
-      .send({ data: cards }))
-    .catch(() => {
-      res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
-    });
+    .then((cards) => res.status(OK_CODE).send({ data: cards }))
+    .catch(next);
+  // .catch(() => {
+  //   res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+  // });
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
     .orFail(() => {
       throw new Error('NotFound');
+    })
+    .then((card) => {
+      if (req.user._id !== card.owner._id.toString()) {
+        throw new ForbiddenError("Недостаточно прав для удаления карточки.");
+      }
+      return Card.findByIdAndRemove(req.params.cardId);
     })
     .then((card) => {
       res.status(OK_CODE)
@@ -41,16 +55,21 @@ module.exports.deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.message === 'NotFound') {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
+        next(new NotFoundError('Карточка с таким id не найдена.'));
+        // return res.status(NOT_FOUND_ERROR_CODE)
+        // .send({ message: 'Карточка с таким id не найдена' });
       }
       if (err.name === 'CastError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для удаления карточки' });
+        next(new BadReqError('Переданы некорректные данные для удаления карточки.'));
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для удаления карточки' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -58,19 +77,23 @@ module.exports.likeCard = (req, res) => {
   )
     .then((like) => {
       if (like === null) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
-      } return res.status(OK_CODE)
-        .send(like);
+        next(new NotFoundError('Карточка с таким id не найдена.'));
+        // return res.status(NOT_FOUND_ERROR_CODE)
+        // .send({ message: 'Карточка с таким id не найдена' });
+      } res.status(OK_CODE).send(like);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка карточки' });
+        next(new BadReqError('Переданы некорректные данные для постановки лайка карточки.'));
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для постановки лайка карточки' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -78,14 +101,18 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then((like) => {
       if (like === null) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с таким id не найдена' });
-      } return res.status(OK_CODE)
-        .send(like);
+        next(new NotFoundError('Карточка с таким id не найдена.'));
+        // return res.status(NOT_FOUND_ERROR_CODE)
+        // .send({ message: 'Карточка с таким id не найдена' });
+      } res.status(OK_CODE).send(like);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для удаления лайка с карточки' });
+        next(new BadReqError('Переданы некорректные данные для постановки лайка карточки.'));
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для удаления лайка с карточки' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };

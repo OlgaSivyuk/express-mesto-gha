@@ -8,20 +8,28 @@ const SECRET_KEY = 'very_secret';
 
 const {
   OK_CODE,
-  BAD_REQ_ERROR_CODE,
-  NOT_FOUND_ERROR_CODE,
-  DEFAULT_ERROR_CODE,
+  CREATED_CODE,
+  // BAD_REQ_ERROR_CODE,
+  // NOT_FOUND_ERROR_CODE,
+  // DEFAULT_ERROR_CODE,
 } = require('../constants/errorsCode');
 
-module.exports.getUsers = (req, res) => {
+const BadReqError = require('../errors/bad-req-error');
+const AuthorizationError = require('../errors/authorization-error');
+const NotFoundError = require('../errors/not-found-error');
+// const ForbidenError = require('../errors/forbiden-error');
+const ConflictError = require('../errors/conflict-error');
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(OK_CODE).send({ data: users }))
-    .catch(() => {
-      res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
-    });
+    .catch(next);
+  // .catch(() => {
+  //   res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+  // });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -31,7 +39,8 @@ module.exports.createUser = (req, res) => {
   } = req.body;
 
   if (!email || !password) {
-    return res.status(400).send({ message: 'не передан email или пароль' });
+    throw new BadReqError('Не передан email или пароль.');
+    // return res.status(400).send({ message: 'не передан email или пароль' });
   }
 
   return bcrypt.hash(password, SALT_ROUNDS) // хешируем пароль
@@ -47,7 +56,7 @@ module.exports.createUser = (req, res) => {
     })
     .then((user) => {
       // console.log(user);
-      res.status(201).send({ data: user, message: 'пользователь создан' }); // исключить передачу пароля, раскрыть data - name: user.name
+      res.status(CREATED_CODE).send({ data: user, message: 'Пользователь создан.' }); // исключить передачу пароля, раскрыть data - name: user.name
       // res.send({ message: 'пользователь создан' });
     })
     .catch((err) => {
@@ -55,56 +64,71 @@ module.exports.createUser = (req, res) => {
       // return res.status(409).send({ message: 'email занят' });
       // return res.status(500).send({ message: 'что-то пошло не так' });
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для создания пользователя' });
+        throw new BadReqError('Переданы некорректные данные для создания пользователя.');
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для создания пользователя' });
       }
       if (err.name === 'MongoServerError') {
-        return res.status(409).send({ message: 'email занят' }); // не срабатывает unique
+        throw new ConflictError('Пользователь с таким email уже есть.');
+        // return res.status(409).send({ message: 'email занят' }); // не срабатывает unique
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере.' });
     });
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   // console.log({ _id: req.params.userId });
   User.findOne({ _id: req.params.userId })
     .then((users) => {
       if (users === null) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному id не найден' });
+        throw new NotFoundError('Пользователь по указанному id не найден.');
+        // return res.status(NOT_FOUND_ERROR_CODE)
+        // .send({ message: 'Пользователь по указанному id не найден' });
       }
       return res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса пользователя' });
+        throw new BadReqError('Переданы некорректные данные для запроса пользователя.');
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для запроса пользователя.' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.getUserMe = (req, res) => {
+module.exports.getUserMe = (req, res, next) => {
   console.log(req.user);
   User.findOne({ _id: req.user._id })
     .then((users) => {
       if (users === null) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному id не найден' });
+        throw new NotFoundError('Пользователь по указанному id не найден.');
+        // return res.status(NOT_FOUND_ERROR_CODE)
+        // .send({ message: 'Пользователь по указанному id не найден' });
       }
       return res.status(OK_CODE)
         .send({ data: users });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для запроса пользователя (куки))' });
+        throw new BadReqError('Переданы некорректные данные для запроса пользователя (куки).');
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для запроса пользователя (куки))' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => {
+      // throw new NotFoundError('Пользователь по указанному id не найден.');
       throw new Error('NotFound');
     })
     .then((users) => {
@@ -113,16 +137,21 @@ module.exports.updateProfile = (req, res) => {
     })
     .catch((err) => {
       if (err.message === 'NotFound') {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь с таким id не найден' });
+        throw new NotFoundError('Пользователь с таким id не найден.');
+        // return res.status(NOT_FOUND_ERROR_CODE)
+        // .send({ message: 'Пользователь с таким id не найден' });
       }
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для обновления пользователя' });
+        throw new BadReqError('Переданы некорректные данные для обновления пользователя.');
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для обновления пользователя' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
@@ -130,21 +159,25 @@ module.exports.updateAvatar = (req, res) => {
       throw new Error('NotFound');
     })
     .then((users) => {
-      res.status(OK_CODE)
-        .send({ data: users });
+      res.status(OK_CODE).send({ data: users });
     })
     .catch((err) => {
       if (err.message === 'NotFound') {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь с таким id не найден' });
+        throw new NotFoundError('Пользователь с таким id не найден.');
+        // return res.status(NOT_FOUND_ERROR_CODE)
+        // .send({ message: 'Пользователь с таким id не найден' });
       }
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQ_ERROR_CODE).send({ message: 'Переданы некорректные данные для обновления пользователя' });
+        throw new BadReqError('Переданы некорректные данные для обновления пользователя.');
+        // return res.status(BAD_REQ_ERROR_CODE)
+        // .send({ message: 'Переданы некорректные данные для обновления пользователя' });
       }
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
+      next(err);
+      // return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка на сервере' });
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   console.log('1 проверка auth_login');
 
@@ -155,26 +188,28 @@ module.exports.login = (req, res) => {
     .then((user) => {
       console.log(user, '2 проверка in first then');
       if (!user) {
-        const err = new Error('Неправильные email или пароль (проверка юзера)');
-        err.statusCode = 403;
-        throw err;
+        throw new AuthorizationError('Неправильные email или пароль (проверка юзера).');
+        // const err = new Error('Неправильные email или пароль (проверка юзера)');
+        // err.statusCode = 403;
+        // throw err;
         // return res.status(403).send({
         // message: 'Неправильные email или пароль (проверка юзера)' });
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) { // хеши не совпали — отклоняем промис
-            const err = new Error('Неправильные email или пароль (проверка хеша)');
-            err.statusCode = 403;
-            throw err;
+            throw new AuthorizationError('Неправильные email или пароль (проверка хеша).');
+            // const err = new Error('Неправильные email или пароль (проверка хеша)');
+            // err.statusCode = 403;
+            // throw err;
             // return res.status(403).send({
             // message: 'Неправильные email или пароль (проверка хеша)' });
           }
           console.log('3 здесь возвращаем токен');
           const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
           // res.send({ token });
-          res.cookie('jwt', token, { maxAge: 3600000, httpOnly: true });
-          res.send({ message: 'Всё верно!' });
+          res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true });
+          res.status(OK_CODE).send({ message: 'Всё верно!' });
         });
     })
 
@@ -187,6 +222,8 @@ module.exports.login = (req, res) => {
       //   return res.status(403).send({ message: err.message });
       // }
       // return res.status(401).send({ message: err.message });
-      res.status(401).send({ message: err.message });
+      next(err);
+      // throw new AuthorizationError({ message: err.message });
+      // res.status(401).send({ message: err.message });
     });
 };

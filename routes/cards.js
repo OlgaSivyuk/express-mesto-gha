@@ -8,7 +8,6 @@ const {
 } = require('../controllers/cards');
 
 router.post('/', createCard);
-// router.post('/:userId', createCard);
 router.get('/', getCard);
 router.delete('/:cardId', deleteCard);
 router.put('/:cardId/likes', likeCard);

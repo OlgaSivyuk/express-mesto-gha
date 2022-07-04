@@ -1,10 +1,5 @@
 const Card = require('../models/card');
 
-// const OK_CODE = 200;
-// const BAD_REQ_ERROR_CODE = 400;
-// const NOT_FOUND_ERROR_CODE = 404;
-// const DEFAULT_ERROR_CODE = 500;
-
 const {
   OK_CODE,
   BAD_REQ_ERROR_CODE,

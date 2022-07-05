@@ -25,7 +25,7 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
 
   if (!email || !password) {
-    return res.status(400).send({ message: 'не передан email или пароль' });
+    return res.status(400).send({ message: 'Не передан email или пароль' });
   }
   return bcrypt.hash(password, SALT_ROUNDS)
     .then((hash) => {
@@ -40,7 +40,12 @@ module.exports.createUser = (req, res, next) => {
     })
     .then((user) => {
       console.log(user);
-      res.status(CREATED_CODE).send({ data: user, message: 'Пользователь создан.' });
+      res.status(CREATED_CODE).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
     })
     .catch((err) => {
       console.log(err);

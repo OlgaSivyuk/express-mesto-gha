@@ -78,12 +78,19 @@ module.exports.dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((like) => {
-      if (like === null) {
-        next(new NotFoundError('Карточка с таким id не найдена.'));
-      } res.status(OK_CODE).send(like);
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
+    .then((card) => {
+      // if (like === null) {
+      //   next(new NotFoundError('Карточка с таким id не найдена.'));
+      // } res.status(OK_CODE).send(like);
+      res.status(OK_CODE).send(card);
     })
     .catch((err) => {
+      if (err.message === 'NotFound') {
+        next(new NotFoundError('Карточка с таким id не найдена.'));
+      }
       if (err.name === 'CastError') {
         next(new BadReqError('Переданы некорректные данные для постановки лайка карточки.'));
       }

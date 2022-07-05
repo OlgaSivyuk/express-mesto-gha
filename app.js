@@ -19,8 +19,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // пути для логина и регистрации
-// app.post('/signup', require('./routes/users'));
-// app.post('/signin', require('./routes/users'));
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),

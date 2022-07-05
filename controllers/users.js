@@ -8,9 +8,6 @@ const SECRET_KEY = 'very_secret';
 const {
   OK_CODE,
   CREATED_CODE,
-  // BAD_REQ_ERROR_CODE,
-  // NOT_FOUND_ERROR_CODE,
-  // DEFAULT_ERROR_CODE,
 } = require('../constants/errorsCode');
 
 const BadReqError = require('../errors/bad-req-error'); // 400
@@ -30,7 +27,7 @@ module.exports.createUser = (req, res, next) => {
   if (!email || !password) {
     return res.status(400).send({ message: 'не передан email или пароль' });
   }
-  return bcrypt.hash(password, SALT_ROUNDS) // хешируем пароль
+  return bcrypt.hash(password, SALT_ROUNDS)
     .then((hash) => {
       console.log(hash);
       return User.create({
@@ -43,7 +40,7 @@ module.exports.createUser = (req, res, next) => {
     })
     .then((user) => {
       console.log(user);
-      res.status(CREATED_CODE).send({ data: user, message: 'Пользователь создан.' }); // исключить передачу пароля, раскрыть data - name: user.name
+      res.status(CREATED_CODE).send({ data: user, message: 'Пользователь создан.' });
     })
     .catch((err) => {
       console.log(err);
@@ -66,18 +63,12 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getUserById = (req, res, next) => {
-  // console.log({ _id: req.params.userId });
   User.findOne({ _id: req.params.userId })
     .orFail(() => {
       throw new NotFoundError('Пользователь по указанному id не найден');
     })
     .then((users) => {
       res.status(OK_CODE).send({ data: users });
-      // if (users === null) {
-      //   next(new NotFoundError('Пользователь по указанному id не найден.'));
-      // }
-      // return res.status(OK_CODE)
-      //   .send({ data: users });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
@@ -110,15 +101,12 @@ module.exports.updateProfile = (req, res, next) => {
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('Пользователь с таким id не найден.');
     })
     .then((users) => {
       res.status(OK_CODE).send({ data: users });
     })
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        next(new NotFoundError('Пользователь с таким id не найден.'));
-      }
       if (err.name === 'ValidationError') {
         next(new BadReqError('Переданы некорректные данные для обновления пользователя.'));
       }
@@ -131,15 +119,12 @@ module.exports.updateAvatar = (req, res, next) => {
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('Пользователь с таким id не найден.');
     })
     .then((users) => {
       res.status(OK_CODE).send({ data: users });
     })
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        next(new NotFoundError('Пользователь с таким id не найден.'));
-      }
       if (err.name === 'ValidationError') {
         next(new BadReqError('Переданы некорректные данные для обновления пользователя.'));
       }
@@ -149,21 +134,17 @@ module.exports.updateAvatar = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  // console.log('1 проверка auth_login');
   User.findOne({ email }).select('+password')
     .then((user) => {
-      // console.log(user, '2 проверка in first then');
       if (!user) {
         throw new AuthorizationError('Неправильные email или пароль (проверка юзера).');
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
-          if (!matched) { // хеши не совпали — отклоняем промис
+          if (!matched) {
             throw new AuthorizationError('Неправильные email или пароль (проверка хеша).');
           }
-          // console.log('3 здесь возвращаем токен');
           const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
-          // res.send({ token });
           res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true });
           res.status(OK_CODE).send({ user });
         })

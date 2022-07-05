@@ -59,10 +59,11 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('Карточка с таким id не найдена.');
+    })
     .then((like) => {
-      if (like === null) {
-        next(new NotFoundError('Карточка с таким id не найдена.'));
-      } res.status(OK_CODE).send(like);
+      res.status(OK_CODE).send(like);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -79,18 +80,12 @@ module.exports.dislikeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('Карточка с таким id не найдена.');
     })
-    .then((card) => {
-      // if (like === null) {
-      //   next(new NotFoundError('Карточка с таким id не найдена.'));
-      // } res.status(OK_CODE).send(like);
-      res.status(OK_CODE).send(card);
+    .then((like) => {
+      res.status(OK_CODE).send(like);
     })
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        next(new NotFoundError('Карточка с таким id не найдена.'));
-      }
       if (err.name === 'CastError') {
         next(new BadReqError('Переданы некорректные данные для постановки лайка карточки.'));
       }

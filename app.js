@@ -6,8 +6,6 @@ const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
 
-// const { createUser, login } = require('./controllers/users');
-
 const { PORT = 3000 } = process.env;
 const app = express();
 
@@ -42,9 +40,6 @@ app.use(auth);
 // пути роутинга
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
-
-// app.post('/signin', login);
-// app.post('/signup', createUser);
 
 // обработка несуществующего роута
 app.use((req, res) => {

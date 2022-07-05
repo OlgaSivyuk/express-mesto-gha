@@ -40,8 +40,7 @@ module.exports.deleteCard = (req, res, next) => {
       return Card.findByIdAndRemove(req.params.cardId);
     })
     .then((card) => {
-      res.status(OK_CODE)
-        .send({ data: card });
+      res.status(OK_CODE).send({ data: card });
     })
     .catch((err) => {
       if (err.message === 'NotFound') {

@@ -18,12 +18,6 @@ const AuthorizationError = require('../errors/authorization-error'); // 401
 const NotFoundError = require('../errors/not-found-error'); // 404
 const ConflictError = require('../errors/conflict-error'); // 409
 
-module.exports.getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.status(OK_CODE).send({ data: users }))
-    .catch(next);
-};
-
 module.exports.createUser = (req, res, next) => {
   const {
     name,
@@ -65,15 +59,25 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
+module.exports.getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.status(OK_CODE).send({ data: users }))
+    .catch(next);
+};
+
 module.exports.getUserById = (req, res, next) => {
   // console.log({ _id: req.params.userId });
   User.findOne({ _id: req.params.userId })
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному id не найден');
+    })
     .then((users) => {
-      if (users === null) {
-        next(new NotFoundError('Пользователь по указанному id не найден.'));
-      }
-      return res.status(OK_CODE)
-        .send({ data: users });
+      res.status(OK_CODE).send({ data: users });
+      // if (users === null) {
+      //   next(new NotFoundError('Пользователь по указанному id не найден.'));
+      // }
+      // return res.status(OK_CODE)
+      //   .send({ data: users });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {

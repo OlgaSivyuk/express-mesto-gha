@@ -14,7 +14,7 @@ const {
 } = require('../constants/errorsCode');
 
 const BadReqError = require('../errors/bad-req-error'); // 400
-const AuthorizationError = require('../errors/authorization-error'); // 401
+// const AuthorizationError = require('../errors/authorization-error'); // 401
 const NotFoundError = require('../errors/not-found-error'); // 404
 const ConflictError = require('../errors/conflict-error'); // 409
 
@@ -150,12 +150,12 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       console.log(user, '2 проверка in first then');
       if (!user) {
-        throw new AuthorizationError('Неправильные email или пароль (проверка юзера).');
+        throw new BadReqError('Неправильные email или пароль (проверка юзера).');
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) { // хеши не совпали — отклоняем промис
-            throw new AuthorizationError('Неправильные email или пароль (проверка хеша).');
+            throw new BadReqError('Неправильные email или пароль (проверка хеша).');
           }
           console.log('3 здесь возвращаем токен');
           const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });

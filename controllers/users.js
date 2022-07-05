@@ -149,24 +149,25 @@ module.exports.updateAvatar = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  console.log('1 проверка auth_login');
+  // console.log('1 проверка auth_login');
   User.findOne({ email }).select('+password')
     .then((user) => {
-      console.log(user, '2 проверка in first then');
+      // console.log(user, '2 проверка in first then');
       if (!user) {
-        throw new BadReqError('Неправильные email или пароль (проверка юзера).');
+        throw new AuthorizationError('Неправильные email или пароль (проверка юзера).');
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) { // хеши не совпали — отклоняем промис
             throw new AuthorizationError('Неправильные email или пароль (проверка хеша).');
           }
-          console.log('3 здесь возвращаем токен');
+          // console.log('3 здесь возвращаем токен');
           const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
           // res.send({ token });
           res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true });
-          res.status(OK_CODE).send({ message: 'Всё верно!' });
-        });
+          res.status(OK_CODE).send({ token });
+        })
+        .catch(next);
     })
     .catch(next);
 };

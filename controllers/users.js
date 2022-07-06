@@ -24,10 +24,10 @@ module.exports.createUser = (req, res, next) => {
     password,
   } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).send({ message: 'Не передан email или пароль' });
-  }
-  return bcrypt.hash(password, SALT_ROUNDS)
+  // if (!email || !password) {
+  //   return res.status(400).send({ message: 'Не передан email или пароль' });
+  // } return
+  bcrypt.hash(password, SALT_ROUNDS)
     .then((hash) => {
       console.log(hash);
       return User.create({
@@ -78,6 +78,7 @@ module.exports.getUserById = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadReqError('Переданы некорректные данные для запроса пользователя.'));
+        return;
       }
       next(err);
     });
@@ -96,6 +97,7 @@ module.exports.getUserMe = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadReqError('Переданы некорректные данные для запроса пользователя (куки).'));
+        return;
       }
       next(err);
     });
@@ -114,6 +116,7 @@ module.exports.updateProfile = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadReqError('Переданы некорректные данные для обновления пользователя.'));
+        return;
       }
       next(err);
     });
@@ -132,6 +135,7 @@ module.exports.updateAvatar = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadReqError('Переданы некорректные данные для обновления пользователя.'));
+        return;
       }
       next(err);
     });
@@ -151,7 +155,7 @@ module.exports.login = (req, res, next) => {
           }
           const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
           res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true });
-          res.status(OK_CODE).send({ user });
+          res.status(OK_CODE).send({ message: 'Успех!' });
         })
         .catch(next);
     })

@@ -17,7 +17,7 @@ router.post(
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
-      link: Joi.string().regex(regexUrl),
+      link: Joi.string().required().regex(regexUrl),
       // link: Joi.string().required()
       // .regex(/^https?:\/\/(www.)?([\w\-\\.]+)?[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=,]*/),
     }),

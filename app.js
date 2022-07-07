@@ -6,6 +6,8 @@ const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
 
+const NotFoundError = require('./errors/not-found-error'); // 404
+
 const { PORT = 3000 } = process.env;
 const app = express();
 
@@ -42,8 +44,8 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 // обработка несуществующего роута
-app.use((req, res) => {
-  res.status(404).send({ message: 'Страница не существует' });
+app.use((req, res, next) => {
+  next(new NotFoundError('Страница не существует.'));
 });
 
 app.use(errors());
@@ -54,6 +56,7 @@ app.use((err, req, res, next) => {
 
   if (err.statusCode) {
     res.status(err.statusCode).send({ message: err.message });
+    return;
   }
 
   console.error(err.stack);

@@ -20,8 +20,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     // required: true,
     validate: {
-      validator(v) {
-        return /^https?:\/\/(www.)?([\w\-\\.]+)?[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=,]*/.test(v);
+      // validator(v) {
+      //   return /^https?:\/\/(www.)?([\w\-\\.]+)?[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=,]*/.test(v);
+      // },
+      validate: {
+        validator: (v) => validator.isURL(v),
       },
       message: 'Введен некорректный формат ссылки.',
     },

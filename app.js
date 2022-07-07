@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
+const { regexUrl } = require('./constants/regex');
 
 const NotFoundError = require('./errors/not-found-error'); // 404
 
@@ -25,7 +26,9 @@ app.post('/signup', celebrate({
     password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(/^https?:\/\/(www.)?([\w\-\\.]+)?[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=,]*/),
+    // avatar: Joi.string()
+    // .pattern(/^https?:\/\/(www.)?([\w\-\\.]+)?[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=,]*/),
+    avatar: Joi.string().regex(regexUrl),
   }),
 }), require('./routes/users'));
 

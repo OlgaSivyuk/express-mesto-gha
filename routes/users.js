@@ -4,12 +4,12 @@ const { regexUrl } = require('../constants/regex');
 
 const {
   getUsers,
-  // createUser,
+  createUser,
   getUserById,
   getUserMe,
   updateProfile,
   updateAvatar,
-  // login,
+  login,
 } = require('../controllers/users');
 
 router.get('/', getUsers);
@@ -46,7 +46,7 @@ router.patch(
   updateAvatar,
 );
 
-// router.post('/signin', login);
-// router.post('/signup', createUser);
+router.post('/signin', login);
+router.post('/signup', createUser);
 
 module.exports = router;

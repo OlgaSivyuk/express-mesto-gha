@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { regexUrl } = require("../constants/regex");
+// const { regexUrl } = require("../constants/regex");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,10 +24,8 @@ const userSchema = new mongoose.Schema({
       // validator(v) {
       //   return /^https?:\/\/(www.)?([\w\-\\.]+)?[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=,]*/.test(v);
       // },
-      validate: {
-        // validator: (v) => validator.isURL(v),
-        validator: (v) => regexUrl.test(v),
-      },
+      validator: (v) => validator.isURL(v),
+      // validator: (v) => regexUrl.test(v),
       message: 'Введен некорректный формат ссылки.',
     },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',

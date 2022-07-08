@@ -46,7 +46,7 @@ router.patch(
   updateAvatar,
 );
 
-router.post('/signin', login);
-router.post('/signup', createUser);
+// router.post('/signin', login);
+// router.post('/signup', createUser);
 
 module.exports = router;

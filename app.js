@@ -6,6 +6,7 @@ const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
 const { regexUrl } = require('./constants/regex');
+const { createUser, login } = require('./controllers/users');
 
 const NotFoundError = require('./errors/not-found-error'); // 404
 
@@ -28,14 +29,14 @@ app.post('/signup', celebrate({
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().regex(regexUrl),
   }),
-}), require('./routes/users'));
+}), createUser);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
-}), require('./routes/users'));
+}), login);
 
 app.use(cookieParser());
 app.use(auth);
